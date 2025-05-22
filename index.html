@@ -82,7 +82,7 @@
       display: flex; 
       justify-content: center; 
       width: calc(192px * 0.6); 
-      height: calc(177px); 
+      height: calc(192px * 0.6 * 0.8); 
       overflow: hidden; 
     }
 
@@ -406,8 +406,8 @@
     const inverterLockToggleManualEl = document.getElementById('inverter-lock-toggle-manual');
     const inverterLockToggleAutoEl = document.getElementById('inverter-lock-toggle-auto');
     const inverterLockStatusAutoEl = document.getElementById('inverter-lock-status-auto');
-    const systemAutoToggleButton = document.getElementById('system-auto-toggle-button'); // Nút On/Off quy trình Auto
-    const setAutoTemperatureButton = document.getElementById('set-auto-temperature-button'); // Nút cài đặt nhiệt độ (trước là auto-start-button)
+    const systemAutoToggleButton = document.getElementById('system-auto-toggle-button'); 
+    const setAutoTemperatureButton = document.getElementById('set-auto-temperature-button'); 
     const desiredTempInput = document.getElementById('desired-temp-input');
 
 
@@ -570,7 +570,15 @@
         
         if (!fromERA) { 
             activeUITab = tabId; 
+        } else {
+            const modeIsAutoFromERA = (tabId === 'auto');
+            if (modeToggleSwitch && modeToggleSwitch.checked !== modeIsAutoFromERA) {
+                 modeToggleSwitch.checked = modeIsAutoFromERA;
+            }
+            // Cập nhật activeUITab để UI nhất quán với trạng thái từ ERA khi `fromERA` là true
+            activeUITab = tabId; 
         }
+
 
         tabElements.forEach(tab => { 
             if (tab.id === tabId) { 
@@ -651,13 +659,10 @@
             if (frequencyInput && frequencySubmitBtn) { if (actionsMap.setFrequencyAction?.action) { frequencyInput.disabled = false; frequencySubmitBtn.disabled = false; frequencySubmitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed'); frequencySubmitBtn.classList.add('bg-purple-600', 'hover:bg-purple-700'); frequencySubmitBtn.textContent = 'Gửi giá trị'; } else { frequencyInput.disabled = true; frequencySubmitBtn.disabled = true; frequencySubmitBtn.textContent = 'Lỗi Action'; frequencySubmitBtn.classList.add('bg-gray-400', 'cursor-not-allowed'); } }
             if (valvePercentageInput && valveSubmitBtn) { if (actionsMap.setValvePercentageAction?.action) { valvePercentageInput.disabled = false; valveSubmitBtn.disabled = false; valveSubmitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed'); valveSubmitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700'); valveSubmitBtn.textContent = 'Gửi giá trị'; } else { valvePercentageInput.disabled = true; valveSubmitBtn.disabled = true; valveSubmitBtn.textContent = 'Lỗi Action'; valveSubmitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');} }
             
-            const setAutoTempButton = document.getElementById('set-auto-temperature-button');
-            if (setAutoTempButton) { 
-                setAutoTempButton.disabled = !(actionsMap.setDesiredTemperatureAction?.action);
-                if(setAutoTempButton.disabled) {
-                    setAutoTempButton.textContent = 'Cài đặt (Lỗi)';
-                    setAutoTempButton.classList.add('bg-gray-300', 'cursor-not-allowed'); 
-                    setAutoTempButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+            if (setAutoTemperatureButton) { 
+                setAutoTemperatureButton.disabled = !(actionsMap.setDesiredTemperatureAction?.action);
+                if(setAutoTemperatureButton.disabled) {
+                    setAutoTemperatureButton.textContent = 'Cài đặt (Lỗi)';
                 }
             }
             
@@ -782,7 +787,7 @@
                 updateDeviceButtonUI(inverterBtn, values[configInverterState.id].value, 'Run', 'Stop'); 
             }
             if (configInverterLockState && values[configInverterLockState.id] !== undefined) {
-                const isUnlocked = (parseInt(values[configInverterLockState.id].value, 10) === 1);
+                const isUnlocked = (parseInt(values[configInverterLockState.id].value, 10) === 0); // 0 là Unlock, 1 là Lock
                 const lockButtonColorClasses = isUnlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600';
                 const lockButtonText = isUnlocked ? 'Unlock' : 'Lock';
 
@@ -794,7 +799,7 @@
                 if (inverterLockToggleAutoEl) {
                     inverterLockToggleAutoEl.textContent = lockButtonText;
                     inverterLockToggleAutoEl.setAttribute('aria-pressed', isUnlocked.toString());
-                    inverterLockToggleAutoEl.className = `w-full max-w-[90px] py-0.5 rounded-md text-white text-xs ${lockButtonColorClasses}`; // Bỏ mt-1 ở đây để không bị lệch với nút run/stop
+                    inverterLockToggleAutoEl.className = `w-full max-w-[90px] py-0.5 rounded-md text-white text-xs ${lockButtonColorClasses}`; 
                 }
                 if (inverterLockStatusAutoEl) {
                     inverterLockStatusAutoEl.textContent = isUnlocked ? 'Unlocked' : 'Locked';
@@ -805,7 +810,7 @@
           },
           onError: (error) => { console.error('ERA Widget Error:', error); if(eraStatusEl) eraStatusEl.textContent = 'Lỗi kết nối ERA Widget: ' + error.message; }
         });
-    } catch (e) { console.error("Lỗi khởi tạo EraWidget:", e); if(eraStatusEl) { eraStatusEl.textContent = "Lỗi: Widget cần chạy trong ERA IoT. " + e.message; eraStatusEl.classList.add("text-red-500", "font-semibold"); } [pumpBtn, compressorBtn, inverterBtn, frequencyInput, frequencySubmitBtn, valvePercentageInput, valveSubmitBtn, document.getElementById('set-auto-temperature-button'), modeToggleSwitch, inverterLockToggleManualEl, inverterLockToggleAutoEl, systemAutoToggleButton].forEach(el => { if(el) { el.disabled = true; el.classList.add('bg-gray-300', 'cursor-not-allowed'); el.classList.remove('bg-red-600', 'bg-green-600', 'bg-purple-600', 'bg-blue-600', 'bg-slate-500', 'bg-yellow-500', 'hover:bg-red-700', 'hover:bg-green-700', 'hover:bg-purple-700', 'hover:bg-blue-700', 'hover:bg-slate-600', 'hover:bg-yellow-600'); if (el.tagName === 'BUTTON' || el.type === 'checkbox') { if (el.type === 'button') el.textContent = 'Lỗi';} } }); }
+    } catch (e) { console.error("Lỗi khởi tạo EraWidget:", e); if(eraStatusEl) { eraStatusEl.textContent = "Lỗi: Widget cần chạy trong ERA IoT. " + e.message; eraStatusEl.classList.add("text-red-500", "font-semibold"); } [pumpBtn, compressorBtn, inverterBtn, frequencyInput, frequencySubmitBtn, valvePercentageInput, valveSubmitBtn, setAutoTemperatureButton, modeToggleSwitch, inverterLockToggleManualEl, inverterLockToggleAutoEl, systemAutoToggleButton].forEach(el => { if(el) { el.disabled = true; el.classList.add('bg-gray-300', 'cursor-not-allowed'); el.classList.remove('bg-red-600', 'bg-green-600', 'bg-purple-600', 'bg-blue-600', 'bg-slate-500', 'bg-yellow-500', 'hover:bg-red-700', 'hover:bg-green-700', 'hover:bg-purple-700', 'hover:bg-blue-700', 'hover:bg-slate-600', 'hover:bg-yellow-600'); if (el.tagName === 'BUTTON' || el.type === 'checkbox') { if (el.type === 'button') el.textContent = 'Lỗi';} } }); }
 
     function updateDeviceButtonUI(button, state, onText, offText) { if (!button) return; const baseId = button.id.replace('-toggle-auto', '').replace('-toggle', ''); const actionOn = actionsMap[baseId + (baseId === 'inverter' ? 'Run' : 'On')]; const actionOff = actionsMap[baseId + (baseId === 'inverter' ? 'Stop' : 'Off')]; if (!(actionOn && actionOff)) { button.disabled = true; button.textContent = 'Lỗi Action'; button.classList.add('bg-gray-400', 'cursor-not-allowed'); button.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-500', 'bg-green-600', 'hover:bg-green-700', 'focus:ring-green-500'); return; } button.disabled = false; const isActiveState = (state === 1 || state === true || String(state).toLowerCase() === 'on' || String(state).toLowerCase() === 'run' || String(state) === '1'); button.setAttribute('aria-pressed', isActiveState.toString()); button.textContent = isActiveState ? onText : offText; button.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-500', 'bg-green-600', 'hover:bg-green-700', 'focus:ring-green-500', 'bg-gray-400', 'cursor-not-allowed'); if (isActiveState) { button.classList.add('bg-green-600', 'hover:bg-green-700', 'focus:ring-green-500'); } else { button.classList.add('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-500'); } }
     
@@ -987,13 +992,14 @@
                 let payload = null; 
                 const desiredTemp = parseFloat(desiredTempInput.value);
 
+
                 if (isCurrentlyRunning) { 
                     actionToTrigger = actionsMap.stopAutoProcessAction;
                     feedbackText = "Dừng quy trình Auto";
                 } else { 
-                    if (isNaN(desiredTemp)) {
+                    if (isNaN(desiredTemp) && (activeUITab === 'auto' && modeToggleSwitch && modeToggleSwitch.checked) ) { // Chỉ yêu cầu nhiệt độ khi BẬT quy trình AUTO
                         if(autoModeFeedbackEl) { 
-                            autoModeFeedbackEl.textContent = 'Vui lòng nhập nhiệt độ mong muốn trước khi bắt đầu.'; 
+                            autoModeFeedbackEl.textContent = 'Vui lòng nhập nhiệt độ mong muốn trước khi bật quy trình Auto.'; 
                             autoModeFeedbackEl.className = 'text-xs sm:text-sm text-red-600 font-medium'; 
                             autoModeFeedbackEl.classList.remove('hidden'); 
                         }
@@ -1001,7 +1007,12 @@
                     }
                     actionToTrigger = actionsMap.startAutoProcessAction;
                     feedbackText = "Bật Quy trình Auto";
-                    payload = { desired_temperature: desiredTemp }; 
+                    // Chỉ gửi nhiệt độ nếu action startAutoProcessAction cần nó.
+                    // Nếu không, payload có thể là null.
+                    // Giả sử action startAutoProcessAction có thể nhận desired_temperature:
+                    if (!isNaN(desiredTemp)) {
+                        payload = { desired_temperature: desiredTemp }; 
+                    }
                 }
                 
                 if (actionToTrigger && actionToTrigger.action) {
@@ -1010,14 +1021,16 @@
                         autoModeFeedbackEl.className = 'text-xs sm:text-sm text-gray-600 font-medium'; 
                         autoModeFeedbackEl.classList.remove('hidden'); 
                     }
-                    this.textContent = 'Đang xử lý...';
+                    // Không thay đổi text của nút ở đây, để onValues cập nhật từ trạng thái thực tế
+                    // this.textContent = 'Đang xử lý...'; 
 
                     eraWidget.triggerAction(actionToTrigger.action, null, payload)
                         .then(() => {
-                            if(autoModeFeedbackEl) { 
-                                autoModeFeedbackEl.textContent = `Đã ${feedbackText.toLowerCase()} thành công.`; 
-                                autoModeFeedbackEl.className = 'text-xs sm:text-sm text-green-600 font-medium'; 
-                            }
+                            // Không cập nhật text ở đây nữa, để onValues xử lý
+                            // if(autoModeFeedbackEl) { 
+                            //     autoModeFeedbackEl.textContent = `Đã ${feedbackText.toLowerCase()} thành công.`; 
+                            //     autoModeFeedbackEl.className = 'text-xs sm:text-sm text-green-600 font-medium'; 
+                            // }
                             console.log(`Action ${feedbackText} triggered successfully.`);
                         })
                         .catch(err => {
@@ -1038,21 +1051,25 @@
             });
         }
 
+
         function handleInverterLockToggle(buttonElement, sourceTabName) {
             if (!buttonElement || buttonElement.disabled || !actionsMap.setInverterLockStateAction?.action) {
                 console.error(`Cannot toggle inverter lock from ${sourceTabName}: button disabled or action not configured.`);
                 return;
             }
-            const currentlyUnlocked = buttonElement.getAttribute('aria-pressed') === 'true';
-            const newValue = currentlyUnlocked ? 0 : 1; 
+            // Đọc trạng thái aria-pressed để biết trạng thái hiện tại TRÊN UI
+            // Nếu aria-pressed là 'true', nghĩa là UI đang hiển thị 'Unlock' (và giá trị hiện tại là 0)
+            // => Lệnh tiếp theo sẽ là Lock (gửi giá trị 1)
+            const currentlyUnlockedOnUI = buttonElement.getAttribute('aria-pressed') === 'true';
+            const newValueToSend = currentlyUnlockedOnUI ? 1 : 0; // 1 for Lock, 0 for Unlock
 
             const originalText = buttonElement.textContent;
             buttonElement.textContent = 'Đang gửi...';
 
-            console.log(`Sending Inverter Lock state from ${sourceTabName}: ${newValue === 1 ? 'Unlock' : 'Lock'}`);
-            eraWidget.triggerAction(actionsMap.setInverterLockStateAction.action, null, { value: newValue })
+            console.log(`Sending Inverter Lock state from ${sourceTabName}: ${newValueToSend === 0 ? 'Unlock' : 'Lock'}`);
+            eraWidget.triggerAction(actionsMap.setInverterLockStateAction.action, null, { value: newValueToSend })
                 .then(() => {
-                    console.log(`Inverter Lock state command (${newValue}) sent successfully from ${sourceTabName}.`);
+                    console.log(`Inverter Lock state command (${newValueToSend}) sent successfully from ${sourceTabName}.`);
                 })
                 .catch(err => {
                     console.error(`Error sending Inverter Lock state command from ${sourceTabName}:`, err);

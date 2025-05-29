@@ -7,6 +7,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <script src="https://www.unpkg.com/@eohjsc/era-widget@1.1.3/src/index.js"></script>
   <style>
     body {
@@ -36,15 +37,18 @@
       background-color: #10b981;
       border: 1.5px solid #059669;
     }
-    .google-chart-container {
+    .apexcharts-canvas { 
         width: 100%;
-        height: 250px;
     }
-    .gauge-container-google {
+    .chart-container { 
         width: 100%;
-        max-width: 150px;
-        height: 100px;
-        margin: auto;
+        height: 300px; 
+    }
+     .gauge-container-google {
+        width: 100%; 
+        max-width: 150px; 
+        height: 100px; 
+        margin: auto; 
     }
     .status-text-auto { 
         font-weight: 500;
@@ -147,8 +151,9 @@
         <div class="flex items-center justify-center space-x-2 mb-4 py-2 bg-gray-100 rounded-md">
           <span class="text-sm font-medium text-gray-700" id="manual-label">Manual</span>
           <label for="mode-toggle-switch" class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" value="" id="mode-toggle-switch" class="sr-only peer" disabled>
+            <input type="checkbox" value="" id="mode-toggle-switch" class="sr-only peer" disabled title="Chuyển đổi chế độ Manual/Auto">
             <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <span class="sr-only">Chuyển đổi chế độ Manual/Auto</span>
           </label>
           <span class="text-sm font-medium text-gray-500" id="auto-label">Auto</span>
         </div>
@@ -203,7 +208,7 @@
                 <form aria-label="Form cài đặt tần số biến tần" class="flex flex-col space-y-2 w-full max-w-[200px] sm:max-w-xs mt-2" id="frequency-form" onsubmit="return false;">
                   <label class="text-gray-700 font-semibold text-sm sm:text-base" for="frequency-input"> Cài đặt tần số (Hz) </label>
                   <input aria-required="true" class="px-2 py-1 sm:px-3 sm:py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent text-xs sm:text-sm" disabled id="frequency-input" max="50" min="0" name="frequency" placeholder="VD: 45,75" required step="0.01" type="number"/>
-                  <p class="text-xs text-gray-600 mt-1">Tần số hiện tại: <span id="current-frequency-display">--</span> Hz</p>
+                  <p class="text-xs text-gray-600 mt-1">Tần số hiện tại (ERA): <span id="current-frequency-display">--</span> Hz</p>
                   <button class="w-full py-1.5 sm:py-2 rounded-md bg-gray-400 text-white font-semibold cursor-not-allowed text-xs sm:text-sm mt-1" disabled id="frequency-submit" type="submit"> Gửi giá trị </button>
                   <p class="text-xs sm:text-sm font-medium hidden" id="frequency-feedback"> </p>
                 </form>
@@ -226,7 +231,7 @@
                 <form aria-label="Form cài đặt tỷ lệ van điện" class="flex flex-col space-y-2 w-full max-w-[200px] sm:max-w-xs mt-1" id="valve-form" onsubmit="return false;">
                   <label class="text-gray-700 font-semibold text-sm sm:text-base" for="valve-percentage-input">Cài đặt tỷ lệ van (%)</label>
                   <input aria-required="true" class="px-2 py-1 sm:px-3 sm:py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm" disabled id="valve-percentage-input" max="100" min="0" name="valve-percentage" placeholder="0 - 100" required step="1" type="number"/>
-                  <p class="text-xs text-gray-600 mt-1">Vị trí thực tế: <span id="actual-valve-position-manual-display">--</span> °</p>
+                  <p class="text-xs text-gray-600 mt-1">Vị trí thực tế (ERA): <span id="actual-valve-position-manual-display">--</span> °</p>
                   <button class="w-full py-1.5 sm:py-2 rounded-md bg-gray-400 text-white font-semibold cursor-not-allowed text-xs sm:text-sm mt-1" disabled id="valve-submit" type="submit">Gửi giá trị</button>
                   <p class="text-xs sm:text-sm font-medium hidden" id="valve-feedback"></p>
                 </form>
@@ -300,7 +305,7 @@
                 <div class="p-4 border border-gray-200 rounded-md bg-gray-50 mt-2">
                     <label for="desired-temp-input" class="block text-sm font-medium text-gray-700 mb-1">Nhiệt độ mong muốn (°C):</label>
                     <input type="number" id="desired-temp-input" name="desired-temp" placeholder="VD: 24.5" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-full mb-2">
-                    <p class="text-xs text-gray-600">Nhiệt độ hiện tại: <span id="current-temp-era-auto">--</span> °C</p>
+                    <p class="text-xs text-gray-600">Nhiệt độ hiện tại (ERA): <span id="current-temp-era-auto">--</span> °C</p>
                      <button id="set-auto-temperature-button" class="w-full mt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-300">
                       Cài đặt nhiệt độ
                     </button>
@@ -316,9 +321,11 @@
           <i class="fas fa-thermometer-half mr-2 sm:mr-3 text-red-500"></i>
           Cảm biến nhiệt độ &amp; áp suất (<span class="text-xs sm:text-sm text-gray-500" id="era-status">Đang kết nối ERA...</span>)
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-6">
           <div class="border border-gray-200 rounded-lg p-2 sm:p-4 bg-gray-50">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 text-center">Đường ống nước cấp</h3>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 text-center">
+              Đường ống nước cấp
+            </h3>
             <div class="flex flex-col xl:flex-row justify-around items-center xl:items-start">
               <div class="flex flex-col items-center w-full xl:w-5/12 mb-2 xl:mb-0">
                 <div id="gauge-temp-in-google" class="gauge-container-google"></div>
@@ -331,7 +338,9 @@
             </div>
           </div>
           <div class="border border-gray-200 rounded-lg p-2 sm:p-4 bg-gray-50">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 text-center">Đường ống nước hồi</h3>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3 text-center">
+              Đường ống nước hồi
+            </h3>
             <div class="flex flex-col xl:flex-row justify-around items-center xl:items-start">
               <div class="flex flex-col items-center w-full xl:w-5/12 mb-2 xl:mb-0">
                 <div id="gauge-temp-out-google" class="gauge-container-google"></div>
@@ -344,14 +353,18 @@
             </div>
           </div>
         </div>
-        <div class="mt-4 sm:mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           <div class="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 shadow">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">Biểu đồ nhiệt độ (°C)</h3>
-            <div id="google_temp_chart_div" class="google-chart-container"></div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3"> 
+              Biểu đồ nhiệt độ (°C)
+            </h3>
+            <div id="apex-temperature-chart" class="chart-container"></div>
           </div>
           <div class="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 shadow">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">Biểu đồ áp suất (bar)</h3>
-            <div id="google_pressure_chart_div" class="google-chart-container"></div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3"> 
+              Biểu đồ áp suất (bar)
+            </h3>
+            <div id="apex-pressure-chart" class="chart-container"></div>
           </div>
         </div>
       </section>
@@ -410,27 +423,132 @@
     const setAutoTemperatureButton = document.getElementById('set-auto-temperature-button'); 
     const desiredTempInput = document.getElementById('desired-temp-input');
 
-
+    // Google Gauge Chart variables
     let googleGaugeTempIn, googleGaugePressureIn, googleGaugeTempOut, googleGaugePressureOut;
-    let dataTempInGauge, dataPressureInGauge, dataTempOutGauge, dataPressureOutGauge;
+    let dataTempInGauge, dataPressureInGauge, dataTempOutGauge, dataPressureOutGauge; 
     let optionsGaugeTemp, optionsGaugePressure;
-    let googleTempLineChart, googlePressureLineChart;
-    let dataGoogleTempLine, dataGooglePressureLine;
-    let baseOptionsGoogleLineChart, updateOptionsGoogleLineChart;
-    const maxDataPointsForLineChart = 20;
-    const chartTextColor = '#000000';
+
+    // ApexCharts Variables
+    let apexTempChart, apexPressureChart;
+    const XAXISRANGE_APEX = 30000; // 1 phút = 60,000 ms, phạm vi hiển thị cho trục X
+    const maxDataPointsApex = 7; // Số điểm dữ liệu tối đa trên biểu đồ (ví dụ: 60 điểm cho 1 phút nếu cập nhật mỗi giây)
+    let apexTempInData = [];
+    let apexTempOutData = [];
+    let apexPressureInData = [];
+    let apexPressureOutData = [];
+    let apexChartUpdateInterval;
+
     let latestTempIn = 0, latestPressureIn = 0, latestTempOut = 0, latestPressureOut = 0;
-    let lineChartUpdateInterval;
+    
+    google.charts.load('current', {'packages':['gauge']}); 
+    google.charts.setOnLoadCallback(drawGaugeCharts); 
 
-    google.charts.load('current', {'packages':['gauge', 'corechart']});
-    google.charts.setOnLoadCallback(drawAllGoogleCharts);
+    // Hàm khởi tạo ApexCharts
+    function initializeApexCharts() {
+        const commonApexOptions = {
+            chart: {
+                type: 'line',
+                height: 280, // Đã đổi từ 350 -> 280
+                animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 500 } },
+                toolbar: { show: false },
+                zoom: { enabled: true, type: 'x', autoScaleYaxis: true },
+                background: 'transparent', // Giữ nền trong suốt 
+            },
+            dataLabels: { enabled: false }, // Tắt data labels như ví dụ
+            stroke: { curve: 'smooth', width: 2 }, // Giảm width một chút
+            markers: { size: 0 },
+            xaxis: {
+                type: 'datetime',
+                range: XAXISRANGE_APEX, // Sử dụng range
+                labels: { format: 'HH:mm:ss', datetimeUTC: false, style: { colors: '#666', fontSize: '10px'} },
+                title: { text: 'Thời gian', style: {color: '#666', fontSize: '11px', fontWeight: 400} }
+            },
+            legend: { // Giữ lại legend vì có 2 series mỗi biểu đồ
+                position: 'top', horizontalAlign: 'right', floating: true, offsetY: -23, offsetX: -5,
+                fontSize: '12px', fontWeight: 500,
+                itemMargin: { horizontal: 5, vertical: 0},
+                markers: { width: 10, height: 10, radius: 12 }
+            },
+            grid: { borderColor: '#e7e7e7', row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } }
+        };
 
-    function drawAllGoogleCharts() { 
-        drawGaugeCharts(); 
-        initializeLineCharts(); 
-        if (lineChartUpdateInterval) clearInterval(lineChartUpdateInterval); 
-        lineChartUpdateInterval = setInterval(updateLineChartsPeriodically, 10000); 
+        const apexTempChartOptions = {
+            ...commonApexOptions,
+            series: [
+                { name: 'Nước cấp (°C)', data: apexTempInData },
+                { name: 'Nước hồi (°C)', data: apexTempOutData }
+            ],
+            title: { text: 'Biểu đồ Nhiệt độ', align: 'left', style: {fontSize: '14px', fontWeight: 'bold'} },
+            colors: ['#008FFB', '#FF4560'], 
+            yaxis: {
+                title: { text: 'Nhiệt độ (°C)', style: {color: '#666', fontSize: '11px'} },
+                min: 0, max: 50, // Giữ nguyên dải Y này hoặc điều chỉnh nếu cần
+                labels: { style: {colors: '#666', fontSize: '10px'} }
+            },
+        };
+        const tempChartEl = document.querySelector("#apex-temperature-chart");
+        if (tempChartEl) {
+            if(apexTempChart) apexTempChart.destroy(); // Hủy biểu đồ cũ nếu có
+            apexTempChart = new ApexCharts(tempChartEl, apexTempChartOptions);
+            apexTempChart.render();
+        }
+
+        const apexPressureChartOptions = {
+            ...commonApexOptions,
+            series: [
+                { name: 'Nước cấp (bar)', data: apexPressureInData },
+                { name: 'Nước hồi (bar)', data: apexPressureOutData }
+            ],
+            title: { text: 'Biểu đồ Áp suất', align: 'left', style: {fontSize: '14px', fontWeight: 'bold'} },
+            colors: ['#00E396', '#775DD0'], 
+            yaxis: {
+                title: { text: 'Áp suất (bar)', style: {color: '#666', fontSize: '11px'} },
+                min: 0, max: 3, // Giữ nguyên dải Y này hoặc điều chỉnh
+                labels: { style: {colors: '#666', fontSize: '10px'} }
+            },
+        };
+         const pressureChartEl = document.querySelector("#apex-pressure-chart");
+         if (pressureChartEl) {
+            if(apexPressureChart) apexPressureChart.destroy(); // Hủy biểu đồ cũ nếu có
+            apexPressureChart = new ApexCharts(pressureChartEl, apexPressureChartOptions);
+            apexPressureChart.render();
+        }
+
+        if (apexChartUpdateInterval) clearInterval(apexChartUpdateInterval);
+        apexChartUpdateInterval = setInterval(updateApexChartsData, 5000); // Cập nhật mỗi giây như ví dụ
     }
+
+    function updateApexChartsData() {
+        const timestamp = new Date().getTime();
+
+        apexTempInData.push([timestamp, latestTempIn]);
+        apexTempOutData.push([timestamp, latestTempOut]);
+        // Giữ số lượng điểm dữ liệu bằng cách loại bỏ điểm cũ nhất nếu vượt quá maxDataPointsApex
+        if (apexTempInData.length > maxDataPointsApex) {
+            apexTempInData.splice(0, apexTempInData.length - maxDataPointsApex);
+            apexTempOutData.splice(0, apexTempOutData.length - maxDataPointsApex);
+        }
+        if (apexTempChart && typeof apexTempChart.updateSeries === 'function') { 
+            apexTempChart.updateSeries([ 
+                { data: apexTempInData.slice() }, // Sử dụng slice() để gửi bản sao của mảng
+                { data: apexTempOutData.slice() } 
+            ]); 
+        }
+
+        apexPressureInData.push([timestamp, latestPressureIn]);
+        apexPressureOutData.push([timestamp, latestPressureOut]);
+        if (apexPressureInData.length > maxDataPointsApex) {
+            apexPressureInData.splice(0, apexPressureInData.length - maxDataPointsApex);
+            apexPressureOutData.splice(0, apexPressureOutData.length - maxDataPointsApex);
+        }
+        if (apexPressureChart && typeof apexPressureChart.updateSeries === 'function') {
+            apexPressureChart.updateSeries([ 
+                { data: apexPressureInData.slice() }, 
+                { data: apexPressureOutData.slice() } 
+            ]); 
+        }
+    }
+    
     function getGaugeChartWidth() { 
         const container = document.getElementById('gauge-temp-in-google'); 
         if (container) { return Math.max(80, container.offsetWidth - 10); } 
@@ -462,77 +580,19 @@
             googleGaugePressureOut.draw(dataPressureOutGauge, optionsGaugePressure); 
         } 
     }
-    function initializeLineCharts() { 
-        const lineChartContainerTemp = document.getElementById('google_temp_chart_div'); 
-        const lineChartContainerPressure = document.getElementById('google_pressure_chart_div'); 
-        baseOptionsGoogleLineChart = { 
-            curveType: 'function', 
-            legend: { position: 'bottom', textStyle: { color: chartTextColor, fontSize: 12 } }, 
-            hAxis: { title: 'Thời gian', textStyle: { color: chartTextColor, fontSize: 11 }, titleTextStyle: { color: chartTextColor, fontSize: 12 } }, 
-            vAxis: { textStyle: { color: chartTextColor, fontSize: 10 }, titleTextStyle: { color: chartTextColor, fontSize: 11 } }, 
-            titleTextStyle: { color: chartTextColor, fontSize: 12 }, 
-            backgroundColor: 'transparent', 
-            chartArea: { width: '80%', height: '65%' }, 
-            animation:{ duration: 500, easing: 'inAndOut', startup: true }, 
-            width: lineChartContainerTemp ? lineChartContainerTemp.offsetWidth : 300, 
-            height: 230 
-        }; 
-        updateOptionsGoogleLineChart = { 
-            ...baseOptionsGoogleLineChart, 
-            animation:{ duration: 500, easing: 'inAndOut', startup: false } 
-        }; 
-        dataGoogleTempLine = new google.visualization.DataTable(); 
-        dataGoogleTempLine.addColumn('string', 'Thời gian'); 
-        dataGoogleTempLine.addColumn('number', 'Nước cấp (°C)'); 
-        dataGoogleTempLine.addColumn('number', 'Nước hồi (°C)'); 
-        if(lineChartContainerTemp) { 
-            googleTempLineChart = new google.visualization.LineChart(lineChartContainerTemp); 
-            googleTempLineChart.draw(dataGoogleTempLine, {...baseOptionsGoogleLineChart, title: 'Biểu đồ nhiệt độ', vAxis: { ...baseOptionsGoogleLineChart.vAxis, title: 'Nhiệt độ (°C)'}}); 
-        } 
-        dataGooglePressureLine = new google.visualization.DataTable(); 
-        dataGooglePressureLine.addColumn('string', 'Thời gian'); 
-        dataGooglePressureLine.addColumn('number', 'Nước cấp (bar)'); 
-        dataGooglePressureLine.addColumn('number', 'Nước hồi (bar)'); 
-        if(lineChartContainerPressure) { 
-            googlePressureLineChart = new google.visualization.LineChart(lineChartContainerPressure); 
-            googlePressureLineChart.draw(dataGooglePressureLine, {...baseOptionsGoogleLineChart, title: 'Biểu đồ áp suất', vAxis: { ...baseOptionsGoogleLineChart.vAxis, title: 'Áp suất (bar)'}}); 
-        } 
-    }
+    
     const debouncedRedrawCharts = debounce(function() { 
-        if (google.visualization && google.visualization.Gauge && google.visualization.LineChart) { 
+        if (google.visualization && typeof google.visualization.Gauge !== 'undefined') { 
             const gaugeWidth = getGaugeChartWidth(); 
             const newGaugeOptions = { width: gaugeWidth, height: gaugeWidth * 0.8, minorTicks: 5, animation:{ duration: 0, easing: 'inAndOut' } }; 
             if(googleGaugeTempIn && dataTempInGauge) googleGaugeTempIn.draw(dataTempInGauge, {...optionsGaugeTemp, ...newGaugeOptions}); 
             if(googleGaugePressureIn && dataPressureInGauge) googleGaugePressureIn.draw(dataPressureInGauge, {...optionsGaugePressure, ...newGaugeOptions}); 
             if(googleGaugeTempOut && dataTempOutGauge) googleGaugeTempOut.draw(dataTempOutGauge, {...optionsGaugeTemp, ...newGaugeOptions}); 
             if(googleGaugePressureOut && dataPressureOutGauge) googleGaugePressureOut.draw(dataPressureOutGauge, {...optionsGaugePressure, ...newGaugeOptions}); 
-            const lineChartContainerTemp = document.getElementById('google_temp_chart_div'); 
-            const lineChartContainerPressure = document.getElementById('google_pressure_chart_div'); 
-            const newLineChartOptionsForResize = { 
-                ...baseOptionsGoogleLineChart, 
-                width: lineChartContainerTemp ? lineChartContainerTemp.offsetWidth : 300, 
-                animation:{ duration: 0, easing: 'inAndOut', startup: false } 
-            }; 
-            if(googleTempLineChart && dataGoogleTempLine) googleTempLineChart.draw(dataGoogleTempLine, {...newLineChartOptionsForResize, title: 'Biểu đồ nhiệt độ', vAxis: { ...newLineChartOptionsForResize.vAxis, title: 'Nhiệt độ (°C)'}}); 
-            if(googlePressureLineChart && dataGooglePressureLine) googlePressureLineChart.draw(dataGooglePressureLine, {...newLineChartOptionsForResize, title: 'Biểu đồ áp suất', vAxis: { ...newLineChartOptionsForResize.vAxis, title: 'Áp suất (bar)'}}); 
-        } 
+        }
     }, 250);
     window.addEventListener('resize', debouncedRedrawCharts);
-    function updateLineChartsPeriodically() { 
-        if (!dataGoogleTempLine || !googleTempLineChart || !dataGooglePressureLine || !googlePressureLineChart) { return; } 
-        const currentTimeLabelForLineChart = new Date().toLocaleTimeString('vi-VN', {hour12:false}); 
-        const lineChartContainerTemp = document.getElementById('google_temp_chart_div'); 
-        const lineChartContainerPressure = document.getElementById('google_pressure_chart_div'); 
-        const currentTempChartWidth = lineChartContainerTemp ? lineChartContainerTemp.offsetWidth : 300; 
-        const currentPressureChartWidth = lineChartContainerPressure ? lineChartContainerPressure.offsetWidth : 300; 
-        const dynamicUpdateOptions = { ...updateOptionsGoogleLineChart }; 
-        if (dataGoogleTempLine.getNumberOfRows() >= maxDataPointsForLineChart) { dataGoogleTempLine.removeRow(0); } 
-        dataGoogleTempLine.addRow([currentTimeLabelForLineChart, latestTempIn, latestTempOut]); 
-        googleTempLineChart.draw(dataGoogleTempLine, { ...dynamicUpdateOptions, width: currentTempChartWidth, title: 'Biểu đồ nhiệt độ', vAxis: { ...dynamicUpdateOptions.vAxis, title: 'Nhiệt độ (°C)'} }); 
-        if (dataGooglePressureLine.getNumberOfRows() >= maxDataPointsForLineChart) { dataGooglePressureLine.removeRow(0); } 
-        dataGooglePressureLine.addRow([currentTimeLabelForLineChart, latestPressureIn, latestPressureOut]); 
-        googlePressureLineChart.draw(dataGooglePressureLine, { ...dynamicUpdateOptions, width: currentPressureChartWidth, title: 'Biểu đồ áp suất', vAxis: { ...dynamicUpdateOptions.vAxis, title: 'Áp suất (bar)'} }); 
-    }
+    
 
     const eraWidget = new EraWidget();
     let configTempIn, configPressureIn, configTempOut, configPressureOut;
@@ -575,7 +635,6 @@
             if (modeToggleSwitch && modeToggleSwitch.checked !== modeIsAutoFromERA) {
                  modeToggleSwitch.checked = modeIsAutoFromERA;
             }
-            // Cập nhật activeUITab để UI nhất quán với trạng thái từ ERA khi `fromERA` là true
             activeUITab = tabId; 
         }
 
@@ -662,7 +721,8 @@
             if (setAutoTemperatureButton) { 
                 setAutoTemperatureButton.disabled = !(actionsMap.setDesiredTemperatureAction?.action);
                 if(setAutoTemperatureButton.disabled) {
-                    setAutoTemperatureButton.textContent = 'Cài đặt (Lỗi)';
+                    setAutoTemperatureButton.classList.add('bg-gray-300', 'cursor-not-allowed'); 
+                    setAutoTemperatureButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
                 }
             }
             
@@ -683,7 +743,7 @@
                 if(systemAutoToggleButton.disabled) {
                     systemAutoToggleButton.textContent = 'Process (Lỗi Action)';
                 } else {
-                    systemAutoToggleButton.textContent = 'Bật Quy trình Auto';
+                    systemAutoToggleButton.textContent = 'Bật Quy trình Auto'; 
                     systemAutoToggleButton.classList.remove('bg-red-600', 'hover:bg-red-700', 'bg-gray-400', 'cursor-not-allowed');
                     systemAutoToggleButton.classList.add('bg-green-600', 'hover:bg-green-700');
                     systemAutoToggleButton.setAttribute('aria-pressed', 'false');
@@ -692,6 +752,7 @@
 
             updateValveIconRotation(valveHandleManualEl, 0); 
             updateValveIconRotation(valveHandleAutoEl, 0);
+            initializeApexCharts(); 
           },
           onValues: (values) => {
             const currentTimeLabel = new Date().toLocaleTimeString('vi-VN', {hour12:false});
@@ -787,7 +848,7 @@
                 updateDeviceButtonUI(inverterBtn, values[configInverterState.id].value, 'Run', 'Stop'); 
             }
             if (configInverterLockState && values[configInverterLockState.id] !== undefined) {
-                const isUnlocked = (parseInt(values[configInverterLockState.id].value, 10) === 0); // 0 là Unlock, 1 là Lock
+                const isUnlocked = (parseInt(values[configInverterLockState.id].value, 10) === 0); 
                 const lockButtonColorClasses = isUnlocked ? 'bg-green-500 hover:bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600';
                 const lockButtonText = isUnlocked ? 'Unlock' : 'Lock';
 
@@ -997,7 +1058,7 @@
                     actionToTrigger = actionsMap.stopAutoProcessAction;
                     feedbackText = "Dừng quy trình Auto";
                 } else { 
-                    if (isNaN(desiredTemp) && (activeUITab === 'auto' && modeToggleSwitch && modeToggleSwitch.checked) ) { // Chỉ yêu cầu nhiệt độ khi BẬT quy trình AUTO
+                    if (isNaN(desiredTemp) && (activeUITab === 'auto' && modeToggleSwitch && modeToggleSwitch.checked) ) { 
                         if(autoModeFeedbackEl) { 
                             autoModeFeedbackEl.textContent = 'Vui lòng nhập nhiệt độ mong muốn trước khi bật quy trình Auto.'; 
                             autoModeFeedbackEl.className = 'text-xs sm:text-sm text-red-600 font-medium'; 
@@ -1007,9 +1068,6 @@
                     }
                     actionToTrigger = actionsMap.startAutoProcessAction;
                     feedbackText = "Bật Quy trình Auto";
-                    // Chỉ gửi nhiệt độ nếu action startAutoProcessAction cần nó.
-                    // Nếu không, payload có thể là null.
-                    // Giả sử action startAutoProcessAction có thể nhận desired_temperature:
                     if (!isNaN(desiredTemp)) {
                         payload = { desired_temperature: desiredTemp }; 
                     }
@@ -1021,16 +1079,13 @@
                         autoModeFeedbackEl.className = 'text-xs sm:text-sm text-gray-600 font-medium'; 
                         autoModeFeedbackEl.classList.remove('hidden'); 
                     }
-                    // Không thay đổi text của nút ở đây, để onValues cập nhật từ trạng thái thực tế
-                    // this.textContent = 'Đang xử lý...'; 
 
                     eraWidget.triggerAction(actionToTrigger.action, null, payload)
                         .then(() => {
-                            // Không cập nhật text ở đây nữa, để onValues xử lý
-                            // if(autoModeFeedbackEl) { 
-                            //     autoModeFeedbackEl.textContent = `Đã ${feedbackText.toLowerCase()} thành công.`; 
-                            //     autoModeFeedbackEl.className = 'text-xs sm:text-sm text-green-600 font-medium'; 
-                            // }
+                            if(autoModeFeedbackEl) { 
+                                autoModeFeedbackEl.textContent = `Đã ${feedbackText.toLowerCase()} thành công.`; 
+                                autoModeFeedbackEl.className = 'text-xs sm:text-sm text-green-600 font-medium'; 
+                            }
                             console.log(`Action ${feedbackText} triggered successfully.`);
                         })
                         .catch(err => {
@@ -1039,6 +1094,16 @@
                                 autoModeFeedbackEl.className = 'text-xs sm:text-sm text-red-600 font-medium'; 
                             }
                             console.error(`Error triggering action ${feedbackText}:`, err);
+                            const currentPressedState = systemAutoToggleButton.getAttribute('aria-pressed') === 'true';
+                             if (currentPressedState) {
+                                systemAutoToggleButton.textContent = 'Tắt Quy trình Auto';
+                                systemAutoToggleButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+                                systemAutoToggleButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                            } else {
+                                systemAutoToggleButton.textContent = 'Bật Quy trình Auto';
+                                systemAutoToggleButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+                                systemAutoToggleButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                            }
                         });
                 } else {
                     if(autoModeFeedbackEl) { 
@@ -1057,16 +1122,13 @@
                 console.error(`Cannot toggle inverter lock from ${sourceTabName}: button disabled or action not configured.`);
                 return;
             }
-            // Đọc trạng thái aria-pressed để biết trạng thái hiện tại TRÊN UI
-            // Nếu aria-pressed là 'true', nghĩa là UI đang hiển thị 'Unlock' (và giá trị hiện tại là 0)
-            // => Lệnh tiếp theo sẽ là Lock (gửi giá trị 1)
-            const currentlyUnlockedOnUI = buttonElement.getAttribute('aria-pressed') === 'true';
-            const newValueToSend = currentlyUnlockedOnUI ? 1 : 0; // 1 for Lock, 0 for Unlock
+            const currentlyUnlocked = buttonElement.getAttribute('aria-pressed') === 'true'; 
+            const newValueToSend = currentlyUnlocked ? 1 : 0; // 1 for Lock, 0 for Unlock
 
             const originalText = buttonElement.textContent;
             buttonElement.textContent = 'Đang gửi...';
 
-            console.log(`Sending Inverter Lock state from ${sourceTabName}: ${newValueToSend === 0 ? 'Unlock' : 'Lock'}`);
+            console.log(`Sending Inverter Lock state from ${sourceTabName}: value ${newValueToSend} (${newValueToSend === 0 ? 'Unlock' : 'Lock'})`);
             eraWidget.triggerAction(actionsMap.setInverterLockStateAction.action, null, { value: newValueToSend })
                 .then(() => {
                     console.log(`Inverter Lock state command (${newValueToSend}) sent successfully from ${sourceTabName}.`);

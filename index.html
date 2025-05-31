@@ -336,7 +336,7 @@
               <div>
                 <div class="p-4 border border-gray-200 rounded-md bg-gray-50 mt-2">
                     <label for="desired-temp-input" class="block text-sm font-medium text-gray-700 mb-1">Nhiệt độ mong muốn (°C):</label>
-                    <input type="number" id="desired-temp-input" name="desired-temp" placeholder="VD: 24.5" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-full mb-2">
+                    <input type="number" id="desired-temp-input" name="desired-temp" placeholder="VD: 24.5" step="0.1" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-full mb-2">
                     <p class="text-xs text-gray-600">Nhiệt độ hiện tại: <span id="current-temp-era-auto">--</span> °C</p>
                      <button id="set-auto-temperature-button" class="w-full mt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-300">
                       Cài đặt nhiệt độ
@@ -344,6 +344,15 @@
                 </div>
                  <p class="text-xs sm:text-sm font-medium hidden mt-2 text-center" id="auto-mode-feedback"></p>
               </div>
+              <div class="p-4 border border-gray-200 rounded-md bg-gray-50 mt-4">
+                <label for="pressure-diff-setpoint-input" class="block text-sm font-medium text-gray-700 mb-1">Setpoint Chênh lệch Áp suất (bar):</label>
+                <input type="number" id="pressure-diff-setpoint-input" name="pressure-diff-setpoint" placeholder="VD: 1.5" step="0.001" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm w-full mb-2">
+                <button id="set-pressure-diff-button" class="w-full mt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-gray-300">
+                  Cài đặt Chênh áp
+                </button>
+                <p class="text-xs sm:text-sm font-medium hidden mt-2 text-center" id="pressure-diff-feedback"></p>
+              </div>
+
             </div>
           </div>
         </div>
@@ -393,9 +402,10 @@
             <div id="apex-temperature-chart" class="chart-container"></div>
           </div>
           <div class="bg-white border border-gray-200 rounded-lg p-2 sm:p-4 shadow">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-1">
               Biểu đồ áp suất (bar)
             </h3>
+            <p class="text-xs text-gray-600 mb-2 sm:mb-3">Chênh lệch áp suất: <span id="pressure-difference-display" class="font-semibold">--</span> bar</p>
             <div id="apex-pressure-chart" class="chart-container"></div>
           </div>
         </div>
@@ -454,6 +464,13 @@
     const systemAutoToggleButton = document.getElementById('system-auto-toggle-button');
     const setAutoTemperatureButton = document.getElementById('set-auto-temperature-button');
     const desiredTempInput = document.getElementById('desired-temp-input');
+
+    // Thêm các element cho setpoint chênh lệch áp suất
+    const pressureDiffSetpointInputEl = document.getElementById('pressure-diff-setpoint-input');
+    const setPressureDiffButtonEl = document.getElementById('set-pressure-diff-button');
+    const pressureDiffFeedbackEl = document.getElementById('pressure-diff-feedback');
+    const pressureDifferenceDisplayEl = document.getElementById('pressure-difference-display');
+
 
     // Google Gauge Chart variables
     let googleGaugeTempIn, googleGaugePressureIn, googleGaugeTempOut, googleGaugePressureOut;
@@ -515,7 +532,7 @@
             yaxis: {
                 title: { text: 'Nhiệt độ (°C)', style: {color: '#666', fontSize: '11px'} },
                 labels: {
-                    formatter: function (val) { return val.toFixed(2); },
+                    formatter: function (val) { return val.toFixed(2); }, // Nhiệt độ giữ 2 số thập phân
                     style: {colors: '#666', fontSize: '10px'}
                 }
             },
@@ -533,12 +550,11 @@
                 { name: 'Nước cấp (bar)', data: apexPressureInData },
                 { name: 'Nước hồi (bar)', data: apexPressureOutData }
             ],
-            title: { text: 'Biểu đồ Áp suất', align: 'left', style: {fontSize: '14px', fontWeight: 'bold'} },
             colors: ['#00E396', '#775DD0'],
             yaxis: {
                 title: { text: 'Áp suất (bar)', style: {color: '#666', fontSize: '11px'} },
                 labels: {
-                    formatter: function (val) { return val.toFixed(3); },
+                    formatter: function (val) { return val.toFixed(3); }, // Áp suất hiển thị 3 số thập phân
                     style: {colors: '#666', fontSize: '10px'}
                 }
             },
@@ -557,8 +573,8 @@
     function updateApexChartsData() {
         const timestamp = new Date().getTime();
 
-        apexTempInData.push([timestamp, parseFloat(latestTempIn.toFixed(2))]);
-        apexTempOutData.push([timestamp, parseFloat(latestTempOut.toFixed(2))]);
+        apexTempInData.push([timestamp, parseFloat(latestTempIn.toFixed(2))]); // Nhiệt độ giữ 2 số thập phân
+        apexTempOutData.push([timestamp, parseFloat(latestTempOut.toFixed(2))]); // Nhiệt độ giữ 2 số thập phân
         if (apexTempInData.length > maxDataPointsApex) {
             apexTempInData.splice(0, apexTempInData.length - maxDataPointsApex);
             apexTempOutData.splice(0, apexTempOutData.length - maxDataPointsApex);
@@ -570,8 +586,8 @@
             ]);
         }
 
-        apexPressureInData.push([timestamp, parseFloat(latestPressureIn.toFixed(2))]);
-        apexPressureOutData.push([timestamp, parseFloat(latestPressureOut.toFixed(2))]);
+        apexPressureInData.push([timestamp, parseFloat(latestPressureIn.toFixed(3))]); // Áp suất hiển thị 3 số thập phân
+        apexPressureOutData.push([timestamp, parseFloat(latestPressureOut.toFixed(3))]); // Áp suất hiển thị 3 số thập phân
         if (apexPressureInData.length > maxDataPointsApex) {
             apexPressureInData.splice(0, apexPressureInData.length - maxDataPointsApex);
             apexPressureOutData.splice(0, apexPressureOutData.length - maxDataPointsApex);
@@ -631,7 +647,7 @@
 
     const eraWidget = new EraWidget();
     let configTempIn, configPressureIn, configTempOut, configPressureOut;
-    let configPumpState, configCompressorState, configInverterState, configActualInverterFrequency, configActualValvePercentage, configOperationMode, configInverterLockState, configAutoProcessState;
+    let configPumpState, configCompressorState, configInverterState, configActualInverterFrequency, configActualValvePercentage, configOperationMode, configInverterLockState, configAutoProcessState, configActualPressureDifference;
     let actionsMap = {
         pumpOn: null, pumpOff: null,
         compressorOn: null, compressorOff: null,
@@ -642,7 +658,8 @@
         setAutoSystemModeAction: null,
         setInverterLockStateAction: null,
         startAutoProcessAction: null,
-        stopAutoProcessAction: null
+        stopAutoProcessAction: null,
+        setPressureDifferenceSetpointAction: null
     };
 
 
@@ -715,8 +732,10 @@
     try {
         eraWidget.init({
           needRealtimeConfigs: true, needHistoryConfigs: false, needActions: true,
-          maxRealtimeConfigsCount: 12, minRealtimeConfigsCount: 12,
-          maxActionsCount: 14, minActionsCount: 13,
+          minRealtimeConfigsCount: 12,
+          maxRealtimeConfigsCount: 13,
+          minActionsCount: 14,
+          maxActionsCount: 15,
           onConfiguration: (configuration) => {
             if(eraStatusEl) eraStatusEl.textContent = 'Đã kết nối ERA IoT. Đã nhận cấu hình.';
             console.log('ERA Widget Configuration:', configuration);
@@ -748,9 +767,9 @@
                 actionsMap.setInverterLockStateAction = configuration.actions?.[11];
                 actionsMap.startAutoProcessAction = configuration.actions?.[12];
                 actionsMap.stopAutoProcessAction = configuration.actions?.[13];
+                actionsMap.setPressureDifferenceSetpointAction = configuration.actions?.[14];
             }
-            // Update button states based on received actions
-            // For circular buttons, we only update disabled state and colors, not text content directly for on/off states
+
             [pumpBtn, compressorBtn, inverterBtn].forEach(btn => {
                 if (btn) {
                     const baseId = btn.id.replace('-toggle', '');
@@ -759,10 +778,9 @@
                     if (actionOn && actionOff) {
                         btn.disabled = false;
                         btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                        // Initial color will be set by onValues
                     } else {
                         btn.disabled = true;
-                        btn.textContent = 'Lỗi'; // Keep text short for circular buttons
+                        btn.textContent = 'Lỗi';
                         btn.classList.add('bg-gray-400', 'cursor-not-allowed');
                     }
                 }
@@ -777,6 +795,21 @@
                     setAutoTemperatureButton.textContent = 'Cài đặt (Lỗi)';
                 }
             }
+            if (pressureDiffSetpointInputEl && setPressureDiffButtonEl) {
+                const isActionConfigured = actionsMap.setPressureDifferenceSetpointAction?.action;
+                pressureDiffSetpointInputEl.disabled = !isActionConfigured;
+                setPressureDiffButtonEl.disabled = !isActionConfigured;
+                if (!isActionConfigured) {
+                    setPressureDiffButtonEl.textContent = 'Lỗi Action';
+                    setPressureDiffButtonEl.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    setPressureDiffButtonEl.classList.remove('bg-teal-600', 'hover:bg-teal-700');
+                } else {
+                    setPressureDiffButtonEl.textContent = 'Cài đặt Chênh áp';
+                    setPressureDiffButtonEl.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    setPressureDiffButtonEl.classList.add('bg-teal-600', 'hover:bg-teal-700');
+                }
+            }
+
 
             if (modeToggleSwitch) {
                 modeToggleSwitch.disabled = !(actionsMap.setManualModeAction?.action && actionsMap.setAutoSystemModeAction?.action);
@@ -785,11 +818,10 @@
              if (actionsMap.setInverterLockStateAction?.action) {
                 if (inverterLockToggleManualEl) {
                     inverterLockToggleManualEl.disabled = false;
-                    // Initial color/text set by onValues
                 }
                 if (inverterLockToggleAutoEl) inverterLockToggleAutoEl.disabled = false;
             } else {
-                if (inverterLockToggleManualEl) { inverterLockToggleManualEl.disabled = true; inverterLockToggleManualEl.textContent = 'Lỗi';} // Short text
+                if (inverterLockToggleManualEl) { inverterLockToggleManualEl.disabled = true; inverterLockToggleManualEl.textContent = 'Lỗi';}
                 if (inverterLockToggleAutoEl) { inverterLockToggleAutoEl.disabled = true; inverterLockToggleAutoEl.textContent = 'Lock (Lỗi)';}
             }
 
@@ -844,9 +876,19 @@
 
 
             if (configTempIn && values[configTempIn.id] !== undefined) { latestTempIn = parseFloat(values[configTempIn.id].value); if (googleGaugeTempIn && dataTempInGauge) { dataTempInGauge.setValue(0, 1, parseFloat(latestTempIn.toFixed(2))); googleGaugeTempIn.draw(dataTempInGauge, optionsGaugeTemp); } if (currentTempEraAutoEl) currentTempEraAutoEl.textContent = latestTempIn.toFixed(2); } else { latestTempIn = 0; if (currentTempEraAutoEl) currentTempEraAutoEl.textContent = '--';}
-            if (configPressureIn && values[configPressureIn.id] !== undefined) { latestPressureIn = parseFloat(values[configPressureIn.id].value); if (googleGaugePressureIn && dataPressureInGauge) { dataPressureInGauge.setValue(0, 1, parseFloat(latestPressureIn.toFixed(2))); googleGaugePressureIn.draw(dataPressureInGauge, optionsGaugePressure); } } else { latestPressureIn = 0; }
+            if (configPressureIn && values[configPressureIn.id] !== undefined) { latestPressureIn = parseFloat(values[configPressureIn.id].value); if (googleGaugePressureIn && dataPressureInGauge) { dataPressureInGauge.setValue(0, 1, parseFloat(latestPressureIn.toFixed(3))); googleGaugePressureIn.draw(dataPressureInGauge, optionsGaugePressure); } } else { latestPressureIn = 0; } // Áp suất hiển thị 3 số thập phân
             if (configTempOut && values[configTempOut.id] !== undefined) { latestTempOut = parseFloat(values[configTempOut.id].value); if (googleGaugeTempOut && dataTempOutGauge) { dataTempOutGauge.setValue(0, 1, parseFloat(latestTempOut.toFixed(2))); googleGaugeTempOut.draw(dataTempOutGauge, optionsGaugeTemp); } } else { latestTempOut = 0; }
-            if (configPressureOut && values[configPressureOut.id] !== undefined) { latestPressureOut = parseFloat(values[configPressureOut.id].value); if (googleGaugePressureOut && dataPressureOutGauge) { dataPressureOutGauge.setValue(0, 1, parseFloat(latestPressureOut.toFixed(2))); googleGaugePressureOut.draw(dataPressureOutGauge, optionsGaugePressure); } } else { latestPressureOut = 0; }
+            if (configPressureOut && values[configPressureOut.id] !== undefined) { latestPressureOut = parseFloat(values[configPressureOut.id].value); if (googleGaugePressureOut && dataPressureOutGauge) { dataPressureOutGauge.setValue(0, 1, parseFloat(latestPressureOut.toFixed(3))); googleGaugePressureOut.draw(dataPressureOutGauge, optionsGaugePressure); } } else { latestPressureOut = 0; } // Áp suất hiển thị 3 số thập phân
+
+            if (pressureDifferenceDisplayEl) {
+                if (configPressureIn && values[configPressureIn.id] !== undefined && configPressureOut && values[configPressureOut.id] !== undefined) {
+                    const diff = parseFloat(latestPressureIn) - parseFloat(latestPressureOut); // No need for toFixed here if latestPressureIn/Out are already numbers
+                    pressureDifferenceDisplayEl.textContent = diff.toFixed(3); // Áp suất hiển thị 3 số thập phân
+                } else {
+                    pressureDifferenceDisplayEl.textContent = '--';
+                }
+            }
+
 
             if (configActualInverterFrequency && values[configActualInverterFrequency.id] !== undefined) {
                 const rawEraFreqValue = parseFloat(values[configActualInverterFrequency.id].value);
@@ -910,7 +952,6 @@
                 if (inverterLockToggleManualEl) {
                     inverterLockToggleManualEl.textContent = lockButtonText;
                     inverterLockToggleManualEl.setAttribute('aria-pressed', isUnlocked.toString());
-                    // Remove all potential color classes first then add the correct one
                     inverterLockToggleManualEl.classList.remove('bg-green-500', 'hover:bg-green-600', 'bg-yellow-500', 'hover:bg-yellow-600', 'bg-gray-400');
                     inverterLockToggleManualEl.classList.add(...lockButtonColorClasses.split(' '));
                 }
@@ -929,7 +970,7 @@
           },
           onError: (error) => { console.error('ERA Widget Error:', error); if(eraStatusEl) eraStatusEl.textContent = 'Lỗi kết nối ERA Widget: ' + error.message; }
         });
-    } catch (e) { console.error("Lỗi khởi tạo EraWidget:", e); if(eraStatusEl) { eraStatusEl.textContent = "Lỗi: Widget cần chạy trong ERA IoT. " + e.message; eraStatusEl.classList.add("text-red-500", "font-semibold"); } [pumpBtn, compressorBtn, inverterBtn, frequencyInput, frequencySubmitBtn, valvePercentageInput, valveSubmitBtn, setAutoTemperatureButton, modeToggleSwitch, inverterLockToggleManualEl, inverterLockToggleAutoEl, systemAutoToggleButton].forEach(el => { if(el) { el.disabled = true; el.classList.add('bg-gray-300', 'cursor-not-allowed'); el.classList.remove('bg-red-600', 'bg-green-600', 'bg-purple-600', 'bg-blue-600', 'bg-slate-500', 'bg-yellow-500', 'hover:bg-red-700', 'hover:bg-green-700', 'hover:bg-purple-700', 'hover:bg-blue-700', 'hover:bg-slate-600', 'hover:bg-yellow-600'); if (el.tagName === 'BUTTON' || el.type === 'checkbox') { if (el.type === 'button') el.textContent = 'Lỗi';} } }); }
+    } catch (e) { console.error("Lỗi khởi tạo EraWidget:", e); if(eraStatusEl) { eraStatusEl.textContent = "Lỗi: Widget cần chạy trong ERA IoT. " + e.message; eraStatusEl.classList.add("text-red-500", "font-semibold"); } [pumpBtn, compressorBtn, inverterBtn, frequencyInput, frequencySubmitBtn, valvePercentageInput, valveSubmitBtn, setAutoTemperatureButton, modeToggleSwitch, inverterLockToggleManualEl, inverterLockToggleAutoEl, systemAutoToggleButton, pressureDiffSetpointInputEl, setPressureDiffButtonEl].forEach(el => { if(el) { el.disabled = true; el.classList.add('bg-gray-300', 'cursor-not-allowed'); el.classList.remove('bg-red-600', 'bg-green-600', 'bg-purple-600', 'bg-blue-600', 'bg-slate-500', 'bg-yellow-500', 'bg-teal-600', 'hover:bg-red-700', 'hover:bg-green-700', 'hover:bg-purple-700', 'hover:bg-blue-700', 'hover:bg-slate-600', 'hover:bg-yellow-600', 'hover:bg-teal-700'); if (el.tagName === 'BUTTON' || el.type === 'checkbox') { if (el.type === 'button') el.textContent = 'Lỗi';} } }); }
 
     function updateDeviceButtonUI(button, state, onText, offText, deviceName) {
         if (!button) return;
@@ -939,7 +980,7 @@
 
         if (!(actionOn && actionOff)) {
             button.disabled = true;
-            button.textContent = 'Lỗi'; // Short text for circular button
+            button.textContent = 'Lỗi';
             button.classList.add('bg-gray-400', 'cursor-not-allowed');
             button.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-500', 'bg-green-600', 'hover:bg-green-700', 'focus:ring-green-500');
             return;
@@ -948,13 +989,10 @@
         const isActiveState = (state === 1 || state === true || String(state).toLowerCase() === 'on' || String(state).toLowerCase() === 'run' || String(state) === '1');
         button.setAttribute('aria-pressed', isActiveState.toString());
 
-        // For circular buttons, we might want to keep the device name or a shorter status
-        // For this example, I'll use On/Off or Run/Stop as requested, but ensure it fits
         let buttonText = isActiveState ? onText : offText;
         if (button.classList.contains('circular-btn') || button.classList.contains('circular-btn-small')) {
-             // If text is too long, consider icons or shorter text
             if (buttonText.length > 4 && (button.classList.contains('circular-btn-small'))) buttonText = buttonText.substring(0,3) + ".";
-             else if (buttonText.length > 3 && button.classList.contains('circular-btn')) buttonText = buttonText.substring(0,3); // Adjusted for 3rem buttons
+             else if (buttonText.length > 3 && button.classList.contains('circular-btn')) buttonText = buttonText.substring(0,3);
         }
         button.textContent = buttonText;
 
@@ -1112,7 +1150,7 @@
                     eraWidget.triggerAction(actionsMap.setDesiredTemperatureAction.action, null, payload)
                         .then(() => {
                             if(autoModeFeedbackEl) {
-                                autoModeFeedbackEl.textContent = `Đã gửi cài đặt nhiệt độ: ${desiredTemp}°C.`;
+                                autoModeFeedbackEl.textContent = `Đã gửi cài đặt nhiệt độ: ${desiredTemp.toFixed(1)}°C.`;
                                 autoModeFeedbackEl.className = 'text-xs sm:text-sm text-green-600 font-medium';
                             }
                             console.log('setDesiredTemperatureAction triggered successfully for temp:', desiredTemp);
@@ -1134,6 +1172,52 @@
                 }
             });
         }
+
+        if (setPressureDiffButtonEl) {
+            setPressureDiffButtonEl.addEventListener('click', function() {
+                if (this.disabled || !actionsMap.setPressureDifferenceSetpointAction?.action) {
+                    if(pressureDiffFeedbackEl) {
+                        pressureDiffFeedbackEl.textContent = 'Chức năng chưa sẵn sàng hoặc lỗi cấu hình Action.';
+                        pressureDiffFeedbackEl.className = 'text-xs sm:text-sm text-red-600 font-medium';
+                        pressureDiffFeedbackEl.classList.remove('hidden');
+                    }
+                    return;
+                }
+                const setpointValue = parseFloat(pressureDiffSetpointInputEl.value);
+                if (isNaN(setpointValue) || setpointValue < 0) {
+                    if(pressureDiffFeedbackEl) {
+                        pressureDiffFeedbackEl.textContent = 'Vui lòng nhập giá trị setpoint hợp lệ (số không âm).';
+                        pressureDiffFeedbackEl.className = 'text-xs sm:text-sm text-red-600 font-medium';
+                        pressureDiffFeedbackEl.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                if(pressureDiffFeedbackEl) {
+                    pressureDiffFeedbackEl.textContent = 'Đang gửi cài đặt chênh áp...';
+                    pressureDiffFeedbackEl.className = 'text-xs sm:text-sm text-gray-600 font-medium';
+                    pressureDiffFeedbackEl.classList.remove('hidden');
+                }
+                const valueForEra = parseFloat(setpointValue.toFixed(3)); // Đảm bảo giá trị gửi đi có 3 chữ số thập phân
+
+                eraWidget.triggerAction(actionsMap.setPressureDifferenceSetpointAction.action, null, { value: valueForEra })
+                    .then(() => {
+                        if(pressureDiffFeedbackEl) {
+                            pressureDiffFeedbackEl.textContent = `Đã gửi cài đặt chênh áp: ${valueForEra.toFixed(3)} bar.`;
+                            pressureDiffFeedbackEl.className = 'text-xs sm:text-sm text-green-600 font-medium';
+                        }
+                        console.log('setPressureDifferenceSetpointAction triggered successfully for value:', valueForEra);
+                    })
+                    .catch(err => {
+                        if(pressureDiffFeedbackEl) {
+                            pressureDiffFeedbackEl.textContent = 'Lỗi khi gửi cài đặt chênh áp.';
+                            pressureDiffFeedbackEl.className = 'text-xs sm:text-sm text-red-600 font-medium';
+                        }
+                        console.error('Error triggering setPressureDifferenceSetpointAction:', err);
+                    });
+            });
+        }
+
 
         if (systemAutoToggleButton) {
             systemAutoToggleButton.addEventListener('click', function() {
@@ -1208,13 +1292,12 @@
             const newValueToSend = currentlyUnlocked ? 1 : 0; // Lock = 1, Unlock = 0
 
             const originalText = buttonElement.textContent;
-            buttonElement.textContent = 'Gửi...'; // Shorter text for circular button
+            buttonElement.textContent = 'Gửi...';
 
             console.log(`Sending Inverter Lock state from ${sourceTabName}: value ${newValueToSend} (${newValueToSend === 0 ? 'Unlock' : 'Lock'})`);
             eraWidget.triggerAction(actionsMap.setInverterLockStateAction.action, null, { value: newValueToSend })
                 .then(() => {
                     console.log(`Inverter Lock state command (${newValueToSend}) sent successfully from ${sourceTabName}.`);
-                    // Text and color will be updated by onValues
                 })
                 .catch(err => {
                     console.error(`Error sending Inverter Lock state command from ${sourceTabName}:`, err);
